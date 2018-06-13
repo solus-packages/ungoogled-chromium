@@ -1,0 +1,52 @@
+<PISI>
+    <Source>
+        <Name>ungoogled-chromium</Name>
+        <Packager>
+            <Name>Joey Riches</Name>
+            <Email>josephriches@gmail.com</Email>
+        </Packager>
+        <License>Apache-2.0</License>
+        <License>BSD-3-Clause</License>
+        <License>GPL-3.0-or-later</License>
+        <License>IJG</License>
+        <License>ISC</License>
+        <License>LGPL-3.0-or-later</License>
+        <License>MIT</License>
+        <License>MPL-1.1</License>
+        <License>OpenSSL</License>
+        <PartOf>network.web.browser</PartOf>
+        <Summary xml:lang="en">Modifications to Google Chromium for removing Google integration and enhancing privacy, control, and transparency</Summary>
+        <Description xml:lang="en">Modifications to Google Chromium for removing Google integration and enhancing privacy, control, and transparency
+</Description>
+        <Archive type="binary" sha1sum="79eb0752a961b8e0d15c77d298c97498fbc89c5a">https://solus-project.com/sources/README.Solus</Archive>
+    </Source>
+    <Package>
+        <Name>ungoogled-chromium</Name>
+        <Summary xml:lang="en">Modifications to Google Chromium for removing Google integration and enhancing privacy, control, and transparency</Summary>
+        <Description xml:lang="en">Modifications to Google Chromium for removing Google integration and enhancing privacy, control, and transparency
+</Description>
+        <PartOf>network.web.browser</PartOf>
+        <Files>
+            <Path fileType="executable">/usr/bin</Path>
+            <Path fileType="data">/usr/share/applications/ungoogled-chromium.desktop</Path>
+            <Path fileType="data">/usr/share/icons/hicolor/128x128/apps/ungoogled-chromium.png</Path>
+            <Path fileType="data">/usr/share/icons/hicolor/16x16/apps/ungoogled-chromium.png</Path>
+            <Path fileType="data">/usr/share/icons/hicolor/22x22/apps/ungoogled-chromium.png</Path>
+            <Path fileType="data">/usr/share/icons/hicolor/24x24/apps/ungoogled-chromium.png</Path>
+            <Path fileType="data">/usr/share/icons/hicolor/256x256/apps/ungoogled-chromium.png</Path>
+            <Path fileType="data">/usr/share/icons/hicolor/32x32/apps/ungoogled-chromium.png</Path>
+            <Path fileType="data">/usr/share/icons/hicolor/48x48/apps/ungoogled-chromium.png</Path>
+            <Path fileType="data">/usr/share/icons/hicolor/64x64/apps/ungoogled-chromium.png</Path>
+            <Path fileType="data">/usr/share/ungoogled-chromium</Path>
+        </Files>
+    </Package>
+    <History>
+        <Update release="1">
+            <Date>2018-06-13</Date>
+            <Version>66.0.3359.181</Version>
+            <Comment>Packaging update</Comment>
+            <Name>Joey Riches</Name>
+            <Email>josephriches@gmail.com</Email>
+        </Update>
+    </History>
+</PISI>

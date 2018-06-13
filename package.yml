@@ -1,0 +1,120 @@
+name       : ungoogled-chromium
+version    : 66.0.3359.181
+release    : 1
+source     :
+    - https://github.com/Eloston/ungoogled-chromium/archive/66.0.3359.181-1.tar.gz : fb928bdaa60521d34ad7f33b92d2bfe5a18103048efe6b886a17144f9cd8074a
+    - https://commondatastorage.googleapis.com/chromium-browser-official/chromium-66.0.3359.181.tar.xz : 37e6673741b365a25a837217b08f77b24b4f5fc4ad88c8581be6a5dae9a9e919
+license    : 
+    - Apache-2.0
+    - BSD-3-Clause
+    - GPL-3.0-or-later
+    - IJG
+    - ISC
+    - LGPL-3.0-or-later
+    - MIT
+    - MPL-1.1
+    - OpenSSL
+component  : network.web.browser
+summary    : Modifications to Google Chromium for removing Google integration and enhancing privacy, control, and transparency
+description: |
+    Modifications to Google Chromium for removing Google integration and enhancing privacy, control, and transparency
+clang      : yes
+builddeps  :
+    - pkgconfig(alsa)
+    - pkgconfig(atk)
+    - pkgconfig(atk-bridge-2.0)
+    - pkgconfig(flac)
+    - pkgconfig(gtk+-3.0)
+    - pkgconfig(lcms2)
+    - pkgconfig(libevent)
+    - pkgconfig(libjpeg)
+    - pkgconfig(libpci)
+    - pkgconfig(libpulse)
+    - pkgconfig(libva)
+    - pkgconfig(libwebp)
+    - pkgconfig(libxslt)
+    - pkgconfig(minizip)
+    - pkgconfig(nss)
+    - pkgconfig(opus)
+    - pkgconfig(pangocairo)
+    - pkgconfig(python3)
+    - pkgconfig(vpx)
+    - pkgconfig(xscrnsaver)
+    - pkgconfig(xtst)
+    - cups-devel
+    - gperf
+    - nodejs
+    - re2-devel
+    - snappy-devel
+    - yasm
+setup      : |
+    # We need to manually create these for the time being
+    mkdir -p buildspace/downloads
+    mkdir -p buildspace/tree
+    
+    # Sets up a generic config for a non-portable chromium
+    # with only minor modifications required
+    ./buildkit-launcher.py genbun linux_rooted
+    
+    # Modify linux_rooted with our flags, notabily -
+    # disabling use of system flags as it breaks ccache for some reason.
+    # It's the difference between 2 hours and 20minutes to rebuild
+    mv $pkgfiles/gn-build-config $workdir/buildspace/user_bundle/gn_flags.map
+    
+    # gnu tar legitimately sucks balls. Move source to where 'de-googling' scripts expect it
+    bsdtar xf $sources/chromium-66.0.3359.181.tar.xz -C $workdir/buildspace/tree --strip=1
+    
+    # De-googling thingabobs...
+    ./buildkit-launcher.py subdom
+    ./buildkit-launcher.py genpkg linux_simple
+    
+    # Debian script to force chromium to use system libraries
+    # Better in almost every single way from chromium provided scripts to do this
+    mv $pkgfiles/unbundle.py $workdir/buildspace/tree
+    
+    pushd buildspace/tree
+
+    # Additional patch to use system libvpx
+    %patch -p1 < $pkgfiles/vpx.patch
+
+    # odd one out
+    rm -v base/third_party/libevent/BUILD.gn
+    # Go unbundle third_party system libs we already have
+    python3 unbundle.py
+build      : |
+    pushd buildspace/tree
+    
+    # optimize_webui=true requires node and this workaround 
+    mkdir -p third_party/node/linux/node-linux-x64/bin
+    ln -s /usr/bin/node $workdir/buildspace/tree/third_party/node/linux/node-linux-x64/bin/node
+    
+    # Build, this automates bootstrapping GN and building chromium
+    ./ungoogled_packaging/build.sh
+install    : |
+    pushd buildspace/tree
+    
+    # install binary to $PATH
+    install -Dm00755 out/Default/chrome $installdir/usr/share/ungoogled-chromium/chrome
+    install -dm00755 $installdir/usr/bin
+    ln -s /usr/share/ungoogled-chromium/chrome $installdir/usr/bin/ungoogled-chromium
+    
+    # chromium
+    cp -a \
+      out/Default/{chrome_{100,200}_percent,resources}.pak \
+      out/Default/{*.bin,chromedriver} \
+      out/Default/locales \
+    $installdir/usr/share/ungoogled-chromium/
+    
+    install -Dm04775 out/Default/chrome_sandbox $installdir/usr/share/ungoogled-chromium/chrome-sandbox
+    
+    # icons
+    for size in 22 24 48 64 128 256; do
+    install -Dm00644 chrome/app/theme/chromium/product_logo_$size.png \
+      $installdir/usr/share/icons/hicolor/${size}x${size}/apps/ungoogled-chromium.png
+    done
+    for size in 16 32; do
+    install -Dm00644 chrome/app/theme/default_100_percent/chromium/product_logo_$size.png \
+      $installdir/usr/share/icons/hicolor/${size}x${size}/apps/ungoogled-chromium.png
+    done
+    
+    install -Dm00644 $pkgfiles/ungoogled-chromium.desktop $installdir/usr/share/applications/ungoogled-chromium.desktop
